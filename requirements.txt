@@ -1,6 +1,10 @@
 
+numpy
 dash
 pandas
 plotly
 gunicorn
 dash-bootstrap-components
+keras
+tensorflow
+h5py=2
