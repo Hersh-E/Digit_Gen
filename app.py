@@ -13,7 +13,7 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 from keras.models import load_model
-import tensorflow as tf
+# import tensorflow as tf
 
 from funcs.latent_gens import generate_latent_points
 
