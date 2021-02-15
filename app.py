@@ -119,5 +119,5 @@ def clean_data(jsonified_cleaned_data):
 	return fig
 
 if __name__ == '__main__':
-	app.run_server(debug=True, processes=1, threaded=True, host='127.0.01',port=8050, use_reloader=False)
-	# app.run_server
+	# app.run_server(debug=True, processes=1, threaded=True, host='127.0.01',port=8050, use_reloader=False)
+	app.run_server
