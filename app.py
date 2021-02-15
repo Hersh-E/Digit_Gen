@@ -9,13 +9,17 @@ import plotly.graph_objects as go
 import plotly.express as px
 from plotly.subplots import make_subplots
 
+
 import pandas as pd
 import numpy as np
 from datetime import datetime
 from keras.models import load_model
+import pathlib
 # import tensorflow as tf
 
 from funcs.latent_gens import generate_latent_points
+
+DATA_PATH = pathlib.Path(__file__).parent.joinpath("Models").resolve()
 
 # def load_gen_model():
 # 	global model
@@ -102,8 +106,8 @@ def clean_data(jsonified_cleaned_data):
 	[Input('generated_values', 'children')]
 )
 def clean_data(jsonified_cleaned_data):
-	gen_model = load_model('./models/generator_model2_100.h5')
-	upc_model = load_model('./models/upc_model.h5')
+	gen_model = load_model(DATA_PATH.joinpath('generator_model2_100.h5'))
+	upc_model = load_model(DATA_PATH.joinpath('upc_model.h5'))
 	 # some expensive clean data step
 	dff = pd.read_json(jsonified_cleaned_data, orient='split')
 
