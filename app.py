@@ -129,6 +129,7 @@ def genImage(jsonified_cleaned_data):
 	return fig
 
 if __name__ == '__main__':
+	global gen_model, upc_model, sess, graph
 
 	graph = tf.compat.v1.get_default_graph()
 	sess = tf.compat.v1.Session(graph = graph)
