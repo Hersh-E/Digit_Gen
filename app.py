@@ -51,14 +51,14 @@ app.layout = dbc.Container([
 				style={"margin": "15px"},
 
 			),
-		], md='4'),
-		dbc.Col([
+		# ], md='4'),
+		# dbc.Col([
 			dcc.Graph(
 				id='generated_number',
 				style={"margin": "15px"},
 			),
 
-		], md='4'),
+		], md='8'),
 
 		dbc.Col([
 			control1,
