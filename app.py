@@ -9,7 +9,6 @@ import plotly.graph_objects as go
 import plotly.express as px
 from plotly.subplots import make_subplots
 
-
 import pandas as pd
 import numpy as np
 from datetime import datetime
@@ -18,18 +17,35 @@ import pathlib
 import tensorflow as tf
 from keras import backend as K
 
+dir(K)
+
 from funcs.latent_gens import generate_latent_points
 
 DATA_PATH = pathlib.Path(__file__).parent.joinpath("Models").resolve()
 
-# def load_gen_model():
-# 	global model
-# 	model = load_model('./models/generator_model2_100.h5')
-#
-#         # this is key : save the graph after loading the model
-# 	global graph
-# 	graph = tf.get_default_graph()
-# load_gen_model()
+# global gen_model, upc_model, sess, graph
+
+graph = tf.compat.v1.get_default_graph()
+sess = tf.compat.v1.Session(graph = graph)
+K.set_session(sess)
+
+# Initialize all variables
+init_op = tf.compat.v1.global_variables_initializer()
+sess.run(init_op)
+
+gen_model = load_model(DATA_PATH.joinpath('generator_model2_100.h5'), compile=False)
+upc_model = load_model(DATA_PATH.joinpath('upc_model.h5'), compile=False)
+
+def gen_image(noise):#, gen_model=gen_model, upc_model=upc_model):
+	global gen_model, upc_model, sess, graph
+	with sess.as_default():
+		with graph.as_default():
+			number = gen_model.predict(noise)
+	number = number * 255
+	with sess.as_default():
+		with graph.as_default():
+			big_number = upc_model.predict(number).reshape(56,56)
+	return big_number
 
 control1 = dbc.Card([
 	dbc.FormGroup([
@@ -109,39 +125,15 @@ def clean_data(jsonified_cleaned_data):
 	[Input('generated_values', 'children')]
 )
 def genImage(jsonified_cleaned_data):
-	global gen_model, upc_model, sess, graph
-	# gen_model = load_model(DATA_PATH.joinpath('generator_model2_100.h5'))
-	# upc_model = load_model(DATA_PATH.joinpath('upc_model.h5'))
-	 # some expensive clean data step
 	dff = pd.read_json(jsonified_cleaned_data, orient='split')
 
-	# with graph.as_default():
-	with sess.as_default():
-		with graph.as_default():
-			number = gen_model.predict(dff.T.to_numpy())
-	number = number * 255
-	with sess.as_default():
-		with graph.as_default():
-			big_number = upc_model.predict(number).reshape(56,56)
+	big_number = gen_image(dff.T.to_numpy())
 
 	fig = px.imshow(big_number, color_continuous_scale='gray_r')
 
 	return fig
 
 if __name__ == '__main__':
-	global gen_model, upc_model, sess, graph
 
-	graph = tf.compat.v1.get_default_graph()
-	sess = tf.compat.v1.Session(graph = graph)
-	K.set_session(sess)
-
-	# Initialize all variables
-	init_op = tf.compat.v1.global_variables_initializer()
-	sess.run(init_op)
-
-	global gen_model, upc_model
-	gen_model = load_model(DATA_PATH.joinpath('generator_model2_100.h5'), compile=False)
-	upc_model = load_model(DATA_PATH.joinpath('upc_model.h5'), compile=False)
-
-	app.run_server(debug=True, processes=1, threaded=True, host='127.0.01',port=8050, use_reloader=False)
+	app.run_server(debug=True, processes=1, threaded=True, host='127.0.0.1',port=8050, use_reloader=False)
 	# app.run_server
