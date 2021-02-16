@@ -109,7 +109,7 @@ def clean_data(jsonified_cleaned_data):
 	[Input('generated_values', 'children')]
 )
 def genImage(jsonified_cleaned_data):
-	global gen_model, upc_model
+	global gen_model, upc_model, sess, graph
 	# gen_model = load_model(DATA_PATH.joinpath('generator_model2_100.h5'))
 	# upc_model = load_model(DATA_PATH.joinpath('upc_model.h5'))
 	 # some expensive clean data step
