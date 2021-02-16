@@ -15,7 +15,8 @@ import numpy as np
 from datetime import datetime
 from keras.models import load_model
 import pathlib
-# import tensorflow as tf
+import tensorflow as tf
+from keras import backend as K
 
 from funcs.latent_gens import generate_latent_points
 
@@ -50,16 +51,18 @@ app.layout = dbc.Container([
 				style={"margin": "15px"},
 
 			),
+		], md='4'),
+		dbc.Col([
 			dcc.Graph(
 				id='generated_number',
 				style={"margin": "15px"},
 			),
 
-		], md='9'),
+		], md='4'),
 
 		dbc.Col([
 			control1,
-		], md='3'),
+		], md='4'),
 
 	], align='center'),
 	# dbc.Row([
@@ -105,23 +108,39 @@ def clean_data(jsonified_cleaned_data):
 	Output('generated_number', 'figure'),
 	[Input('generated_values', 'children')]
 )
-def clean_data(jsonified_cleaned_data):
-	gen_model = load_model(DATA_PATH.joinpath('generator_model2_100.h5'))
-	upc_model = load_model(DATA_PATH.joinpath('upc_model.h5'))
+def genImage(jsonified_cleaned_data):
+	global gen_model, upc_model
+	# gen_model = load_model(DATA_PATH.joinpath('generator_model2_100.h5'))
+	# upc_model = load_model(DATA_PATH.joinpath('upc_model.h5'))
 	 # some expensive clean data step
 	dff = pd.read_json(jsonified_cleaned_data, orient='split')
 
 	# with graph.as_default():
-	number = gen_model.predict(dff.T.to_numpy())
-
+	with sess.as_default():
+		with graph.as_default():
+			number = gen_model.predict(dff.T.to_numpy())
 	number = number * 255
-
-	big_number = upc_model.predict(number).reshape(56,56)
+	with sess.as_default():
+		with graph.as_default():
+			big_number = upc_model.predict(number).reshape(56,56)
 
 	fig = px.imshow(big_number, color_continuous_scale='gray_r')
 
 	return fig
 
 if __name__ == '__main__':
-	# app.run_server(debug=True, processes=1, threaded=True, host='127.0.01',port=8050, use_reloader=False)
-	app.run_server
+
+	graph = tf.compat.v1.get_default_graph()
+	sess = tf.compat.v1.Session(graph = graph)
+	K.set_session(sess)
+
+	# Initialize all variables
+	init_op = tf.compat.v1.global_variables_initializer()
+	sess.run(init_op)
+
+	global gen_model, upc_model
+	gen_model = load_model(DATA_PATH.joinpath('generator_model2_100.h5'), compile=False)
+	upc_model = load_model(DATA_PATH.joinpath('upc_model.h5'), compile=False)
+
+	app.run_server(debug=True, processes=1, threaded=True, host='127.0.01',port=8050, use_reloader=False)
+	# app.run_server
